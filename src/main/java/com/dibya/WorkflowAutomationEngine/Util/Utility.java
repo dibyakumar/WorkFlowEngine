@@ -7,13 +7,10 @@ import com.dibya.WorkflowAutomationEngine.Services.WorkflowExecutionLogic.Execut
 import com.dibya.WorkflowAutomationEngine.Services.WorkflowExecutionLogic.Executors.Context.EmailStepContext;
 import com.dibya.WorkflowAutomationEngine.Services.WorkflowExecutionLogic.Executors.Context.StepContext;
 import com.dibya.WorkflowAutomationEngine.Services.WorkflowExecutionLogic.Executors.Context.WebhookStepContext;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.security.auth.Subject;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -135,7 +132,7 @@ public class Utility {
     }
 
 
-    public String getUserNameFromToken(){
+    public String getCurrentLoggedInUser(){
         String username = Objects.requireNonNull(SecurityContextHolder.getContext()
                 .getAuthentication()).getName();
         return null != username ? username : "";

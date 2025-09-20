@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<?> handleServiceException(ServiceException ex) {
+        ex.printStackTrace();
         return ResponseEntity.status(ex.getStatusCode())
                 .body(new ErrorResponse(ex.getMessage(), ex.getStatusCode()));
     }
@@ -20,6 +21,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGenericException(Exception ex) {
         log.error(ex.getMessage());
+        ex.printStackTrace();
         // Return a generic error response
         return ResponseEntity.status(500)
                 .body(new ErrorResponse(ex.getMessage(), 500));
@@ -27,6 +29,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleGenericException(RuntimeException ex) {
         log.error(ex.getMessage());
+        ex.printStackTrace();
         // Return a generic error response
         return ResponseEntity.status(500)
                 .body(new ErrorResponse(ex.getMessage(), 500));

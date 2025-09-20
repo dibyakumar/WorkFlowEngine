@@ -1,15 +1,13 @@
 package com.dibya.WorkflowAutomationEngine.Model;
 
 import com.dibya.WorkflowAutomationEngine.Services.WorkflowExecutionLogic.Executors.Context.StepContext;
+import lombok.Builder;
 import lombok.Data;
-import java.util.List;
-/*
-    passing
-    "type": "" -> is mandatory for deserialization to work
- */
+
 @Data
-public class WorkflowRequest {
+@Builder
+public class StepDto {
     private Long id;
-    private String workflowName;
-    private List<StepContext> steps;
+    private String stepType;
+    private StepContext stepContext;
 }
