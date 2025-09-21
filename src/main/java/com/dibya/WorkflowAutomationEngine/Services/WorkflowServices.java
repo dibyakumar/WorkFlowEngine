@@ -42,7 +42,7 @@ public class WorkflowServices {
         List<Step> byWorkflowId = stepRepository.findByWorkflowId(workflowOptional.get());
         List<StepDto> stepDtos = new ArrayList<>();
         for( Step step : byWorkflowId){
-            stepDtos.add(StepDto.builder().stepContext(step.getConfig()).stepType(step.getType()).id(step.getId()).build());
+            stepDtos.add(StepDto.builder().stepContext(step.getConfig()).stepType(step.getType()).id(step.getId()).nextStepId(step.getNextStep()!=null?step.getNextStep().getId().toString():"").build());
         }
         return stepDtos;
     }

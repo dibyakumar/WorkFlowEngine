@@ -15,4 +15,5 @@ public class StepExecutionLog implements  LogOutputDto{
     private String workflowId;
     private String executionId;
     private String input;
+    private String nextStepId;
 }

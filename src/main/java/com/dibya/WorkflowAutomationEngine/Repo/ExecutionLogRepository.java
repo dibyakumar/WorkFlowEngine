@@ -14,4 +14,7 @@ public interface ExecutionLogRepository extends JpaRepository<ExecutionLog,Long>
 
     @Query("SELECT e FROM ExecutionLog e WHERE e.workflowId.id = ?1 order by e.endedAt desc")
     Page<ExecutionLog> findByWorkflowId(String workflowId, Pageable pageable);
+
+    @Query("SELECT e FROM ExecutionLog e WHERE  e.executionId = ?1 AND e.step.id = ?2")
+    ExecutionLog findByExecutionIdAndStepId(UUID executionId, String stepId);
 }

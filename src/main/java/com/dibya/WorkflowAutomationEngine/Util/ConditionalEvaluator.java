@@ -22,6 +22,15 @@ public class ConditionalEvaluator {
             return false; // Handle missing values
         }
 
+        // for boolean cases
+        if("true".equalsIgnoreCase(rightValue) || "false".equalsIgnoreCase(rightValue)){
+            return workflowContext.getVariables().get(this.leftValue).equals(Boolean.valueOf(rightValue));
+        }
+
+        if(rightValue.matches("^[a-zA-Z]+$")){
+            return ((String)workflowContext.getVariables().get(this.leftValue)).equalsIgnoreCase(rightValue);
+        }
+
         Integer leftValue =  (Integer) workflowContext.getVariables().get(this.leftValue);
 
         return switch (condition) {

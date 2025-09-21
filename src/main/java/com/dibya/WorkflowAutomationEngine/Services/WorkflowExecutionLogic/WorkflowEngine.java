@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -80,11 +81,11 @@ public class WorkflowEngine {
         Long workflowId = workflowStartRequest.getWorkflowId();
         if (null == workflowId)
             throw new ServiceException("Workflow ID is required to start a workflow", 400);
-
+        String currentLoggedInUser = utility.getCurrentLoggedInUser();
         Workflow workflow = workflowRepository.findById(workflowId).orElse(null);
-
-        if (null == workflow) {
-            throw new RuntimeException("Workflow not found with id: " + workflowId);
+        // validate workflow and user
+        if (null == workflow || !workflow.getCreatedBy().getUserName().equals(currentLoggedInUser)) {
+            throw new ServiceException("Workflow not found with id: " + workflowId,400);
         }
 
         if ("I".equalsIgnoreCase(workflow.getStatus()))
@@ -133,23 +134,35 @@ public class WorkflowEngine {
 
     }
 
+    // create chain of responsibility for all steps using depth first search
     private List<ChainNode> createStepChain(List<Step> allSteps, Map<String, Object> input) {
         List<ChainNode> allNodeExecutors = new ArrayList<>();
+        // visited map to keep track of visited steps
+        Map<Long,Boolean> visited = allSteps.stream().collect(Collectors.toMap(Step::getId, step -> false));
         // chain all steps
         for (Step step : allSteps) {
-            StepExecutor stepExecutor = stepExecutorFactory.getStepExecutor(step.getType());
-            ChainNode chainNode = new ChainNode(stepExecutor, utility.stepToStepContextMapper(step, input), step.getId());
-            allNodeExecutors.add(chainNode);
-            ChainNode nextNode = null;
-            if (null != step.getNextStep()) {
-                StepExecutor nextStepExecutor = stepExecutorFactory.getStepExecutor(step.getNextStep().getType());
-                nextNode = new ChainNode(nextStepExecutor, utility.stepToStepContextMapper(step.getNextStep(), input), step.getNextStep().getId());
-                chainNode.setNextExecutorNode(nextNode);
-                allNodeExecutors.add(nextNode);
-            }
+           if(visited.get(step.getId()))
+               continue;
+           ChainNode parentNode = new ChainNode(stepExecutorFactory.getStepExecutor(step.getType()),utility.stepToStepContextMapper(step,input),step.getId());
+           allNodeExecutors.add(parentNode);
+           depthFirstSearch(step,visited,allNodeExecutors,parentNode,input);
         }
         return allNodeExecutors;
 
+    }
+//-1917930650
+    private void depthFirstSearch(Step parentStep,Map<Long,Boolean> visited,List<ChainNode> listOfChainNodes,ChainNode parentNode,Map<String,Object> input){
+        if(visited.get(parentStep.getId()))
+            return;
+        visited.put(parentStep.getId(),true);
+        if(null == parentStep.getNextStep()){
+              return;
+        }
+        Step nextStep = parentStep.getNextStep();
+        ChainNode childNode = new ChainNode(stepExecutorFactory.getStepExecutor(nextStep.getType()), utility.stepToStepContextMapper(nextStep, input), nextStep.getId());
+        listOfChainNodes.add(childNode);
+        parentNode.setNextExecutorNode(childNode);
+        depthFirstSearch(nextStep,visited,listOfChainNodes,childNode,input);
     }
 
     public void updateWorkflow(WorkflowRequest workflowRequest) {

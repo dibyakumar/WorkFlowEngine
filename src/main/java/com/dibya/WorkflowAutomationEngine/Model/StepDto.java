@@ -9,5 +9,6 @@ import lombok.Data;
 public class StepDto {
     private Long id;
     private String stepType;
+    private String nextStepId;
     private StepContext stepContext;
 }

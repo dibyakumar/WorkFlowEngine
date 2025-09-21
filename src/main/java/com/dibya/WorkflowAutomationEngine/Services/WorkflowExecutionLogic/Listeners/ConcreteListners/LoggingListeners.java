@@ -33,7 +33,7 @@ public class LoggingListeners implements WorkflowListener, StepListener {
 
     @Override
     public void onStepStart(String stepId, String workflowId, UUID executionId) {
-            if(null == getExecutionLog(executionId)){
+            if(null == getExecutionLog(stepId,executionId)){
                 ExecutionLog executionLog = new ExecutionLog();
                 executionLog.setExecutionId(executionId);
                 Optional<Workflow> workflow = workflowRepository.findById(Long.valueOf(workflowId));
@@ -53,7 +53,7 @@ public class LoggingListeners implements WorkflowListener, StepListener {
 
     @Override
     public void onStepEnd(String stepId, String workflowId, UUID executionId) {
-        ExecutionLog executionLog = getExecutionLog(executionId);
+        ExecutionLog executionLog = getExecutionLog(stepId,executionId);
         if(null != executionLog){
             executionLog.setStatus(EXECUTION_STATUS.COMPLETED.name());
             executionLog.setEndedAt(LocalDateTime.now());
@@ -68,7 +68,7 @@ public class LoggingListeners implements WorkflowListener, StepListener {
 
     @Override
     public void onStepFailure(String stepId, String workflowId, UUID executionId, String message) {
-        ExecutionLog executionLog = getExecutionLog(executionId);
+        ExecutionLog executionLog = getExecutionLog(stepId,executionId);
         if(null != executionLog){
             executionLog.setStatus(EXECUTION_STATUS.FAILED.name());
             executionLog.setEndedAt(LocalDateTime.now());
@@ -111,8 +111,8 @@ public class LoggingListeners implements WorkflowListener, StepListener {
             }
     }
 
-    private ExecutionLog getExecutionLog(UUID executionId) {
-        return executionLogRepository.findByExecutionId(executionId);
+    private ExecutionLog getExecutionLog(String stepId ,UUID executionId) {
+        return executionLogRepository.findByExecutionIdAndStepId(executionId,stepId);
     }
 
     private WorkflowExecutionLog getWorkflowExecutionLog(UUID executionId) {
